@@ -70,12 +70,15 @@ def main():
 
         logger.debug("Device hostname = " + str_hostname)
         str_hostname = str_hostname[9:-2]
+        dir_name = str_hostname
         str_hostname = str_hostname.rstrip() + ".txt"
 
         # To get the output of show run and save to a file
         logger.debug("Connecting to Device " + row_str + "to get output of show run")
         show_run_output = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "sh run")
-        file_path = current_path + "\\outputs\\run\\sh_run_" + str_hostname
+        os.mkdir(current_path + "\\outputs\\Devices\\" + dir_name)
+        os.mkdir(current_path + "\\outputs\\Devices\\" + dir_name + "\\run")
+        file_path = current_path + "\\outputs\\Devices\\" + dir_name + "\\run\\sh_run_" + str_hostname
         try:
             my_output_file = open(file_path, "w")
             my_output_file.writelines(show_run_output)
@@ -87,7 +90,8 @@ def main():
         # To get the output of show version and save to a file
         logger.debug("Connecting to Device " + row_str + "to get output of show version")
         show_ver_output = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "sh version")
-        file_path = current_path + "\\outputs\\version\\sh_ver_" + str_hostname
+        os.mkdir(current_path + "\\outputs\\Devices\\" + dir_name + "\\version")
+        file_path = current_path + "\\outputs\\Devices\\" + dir_name + "\\version\\sh_ver_" + str_hostname
         try:
             my_output_file = open(file_path, "w")
             my_output_file.writelines(show_ver_output)

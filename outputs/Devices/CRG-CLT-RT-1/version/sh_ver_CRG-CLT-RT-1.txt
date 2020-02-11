@@ -5,7 +5,7 @@ Compiled Wed 12-Feb-14 04:57 by prod_rel_team
 
 ROM: System Bootstrap, Version 15.0(1r)M16, RELEASE SOFTWARE (fc1)
 
-CRG-CLT-RT-1 uptime is 4 weeks, 1 day, 8 hours, 32 minutes
+CRG-CLT-RT-1 uptime is 4 weeks, 2 days, 3 hours, 8 minutes
 System returned to ROM by power-on
 System image file is "flash0:c2900-universalk9-mz.SPA.154-1.T1.bin"
 Last reload type: Normal Reload

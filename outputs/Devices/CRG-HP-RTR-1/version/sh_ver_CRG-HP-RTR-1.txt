@@ -5,7 +5,7 @@ Compiled Wed 12-Feb-14 04:57 by prod_rel_team
 
 ROM: System Bootstrap, Version 15.0(1r)M16, RELEASE SOFTWARE (fc1)
 
-CRG-HP-RTR-1 uptime is 24 weeks, 5 days, 1 hour, 2 minutes
+CRG-HP-RTR-1 uptime is 24 weeks, 5 days, 19 hours, 39 minutes
 System returned to ROM by power-on
 System restarted at 20:37:12 EDT Wed Aug 21 2019
 System image file is "flash0:c2900-universalk9-mz.SPA.154-1.T1.bin"
