@@ -43,10 +43,11 @@ def connect_to_device(ip_address, username, password, command_to_run):
     # Returns the output of the command received
     return command_result
 
+
 def main():
     # Read list of ips to connect from CSV file and skips the first row
     logger.debug("Getting list of devices from CSV File")
-    host_list = open(r"C:\Users\walsolan\Documents\Scripts\devices.csv", "rt")
+    host_list = open(r"C:\Users\jjimenez\Documents\GitHub\Cisco\Devices.csv", "rt")
     read_file = csv.reader(host_list)
     next(read_file)
 
@@ -60,16 +61,21 @@ def main():
 
         # Get hostname from list and leave only the name from the list
         logger.debug("Connecting to Device " + row_str + "to get hostname")
-        hostname = connect_to_device(row_str, "Aut0Mat3", "Aut0Mat3_2019", "show run | inc hostname")
-        str_hostname = hostname[0]
+        hostname = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "show run | inc hostname")
+
+        for hn in hostname:
+            if "hostname" in hn:
+                str_hostname = hn
+                break
+
         logger.debug("Device hostname = " + str_hostname)
-        str_hostname = str_hostname[8:-1]
+        str_hostname = str_hostname[9:-2]
         str_hostname = str_hostname.rstrip() + ".txt"
 
         # To get the output of show run and save to a file
         logger.debug("Connecting to Device " + row_str + "to get output of show run")
-        show_run_output = connect_to_device(row_str, "Aut0Mat3", "Aut0Mat3_2019", "sh run")
-        file_path = current_path + "\\outputs\\sh_run_" + str_hostname
+        show_run_output = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "sh run")
+        file_path = current_path + "\\outputs\\run\\sh_run_" + str_hostname
         try:
             my_output_file = open(file_path, "w")
             my_output_file.writelines(show_run_output)
@@ -80,8 +86,8 @@ def main():
 
         # To get the output of show version and save to a file
         logger.debug("Connecting to Device " + row_str + "to get output of show version")
-        show_ver_output = connect_to_device(row_str, "Aut0Mat3", "Aut0Mat3_2019", "sh version")
-        file_path = current_path + "\\outputs\\sh_ver_" + str_hostname
+        show_ver_output = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "sh version")
+        file_path = current_path + "\\outputs\\version\\sh_ver_" + str_hostname
         try:
             my_output_file = open(file_path, "w")
             my_output_file.writelines(show_ver_output)

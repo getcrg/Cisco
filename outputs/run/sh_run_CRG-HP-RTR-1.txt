@@ -1,0 +1,518 @@
+Building configuration...
+
+
+Current configuration : 11224 bytes
+!
+! Last configuration change at 15:41:05 EST Mon Dec 9 2019 by crgadmin
+! NVRAM config last updated at 14:21:41 EST Sat Nov 16 2019 by crgadmin
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname CRG-HP-RTR-1
+!
+boot-start-marker
+boot-end-marker
+!
+aqm-register-fnf
+!
+card type t1 0 0
+enable secret 5 $1$U8.F$C13yMm1zpfVg6MeEEYPLA.
+!
+no aaa new-model
+clock timezone EST -5 0
+clock summer-time EDT recurring
+network-clock-participate wic 0 
+network-clock-select 1 T1 0/0/0
+!
+!
+!
+!
+!
+!
+!
+ip domain name crgwf.com
+ip name-server 192.168.10.17
+ip cef
+no ipv6 cef
+multilink bundle-name authenticated
+!
+!
+flow record NfliteRecord
+ match ipv4 tos
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ collect transport tcp flags rst
+ collect interface input
+ collect flow sampler
+ collect counter bytes long
+ collect counter packets long
+ collect timestamp sys-uptime first
+ collect timestamp sys-uptime last
+!
+!
+flow exporter NfliteExporter
+ destination 192.168.253.80
+ source Loopback0
+ transport udp 9996
+ template data timeout 60
+ option interface-table
+ option exporter-stats
+ option sampler-table
+!
+!
+flow monitor NfliteMonitor
+ exporter NfliteExporter
+ cache timeout active 60
+ statistics packet protocol
+ record NfliteRecord
+!
+sampler NfliteSampler
+ mode random 1 out-of 32
+!
+!
+!
+!
+isdn switch-type primary-4ess
+!
+!
+!
+voice-card 0
+ dsp services dspfarm
+!
+!
+!
+voice service voip
+ ip address trusted list
+  ipv4 184.173.219.134
+  ipv4 192.168.253.1
+  ipv4 216.85.165.66
+  ipv4 192.168.253.30
+  ipv4 50.23.70.242
+  ipv4 192.168.253.160
+  ipv4 64.73.216.71
+  ipv4 172.17.202.142
+  ipv4 172.17.2.141
+  ipv4 172.17.0.142
+  ipv4 172.17.0.141
+  ipv4 192.168.44.5
+  ipv4 192.168.200.10
+  ipv4 10.194.120.30
+  ipv4 10.194.120.31
+  ipv4 10.192.10.32
+  ipv4 10.192.10.30
+  ipv4 10.197.198.32
+  ipv4 10.192.10.31
+  ipv4 10.197.198.31
+ address-hiding
+ mode border-element 
+ allow-connections h323 to h323
+ allow-connections h323 to sip
+ allow-connections sip to h323
+ allow-connections sip to sip
+ fax protocol t38 version 0 ls-redundancy 0 hs-redundancy 0 fallback none
+ h323
+  call preserve 
+ sip
+  early-offer forced
+  midcall-signaling passthru
+  g729 annexb-all
+!
+voice class codec 1
+ codec preference 1 g722-64
+ codec preference 2 g729r8
+!
+voice class codec 2
+ codec preference 1 g729r8
+ video codec h264
+!
+voice class codec 3
+ codec preference 1 g722-64
+ codec preference 2 g711ulaw
+ codec preference 3 g729r8
+ codec preference 4 g711alaw
+!
+voice class h323 10
+  h225 timeout tcp establish 3
+  h225 timeout setup 2
+!
+voice class sip-profiles 100
+ request ANY sip-header From modify "192.168.200.10" "192.168.254.10" 
+ request ANY sip-header Via modify "192.168.200.10" "192.168.254.10" 
+ request ANY sip-header Remote-Party-ID modify "192.168.200.10" "192.168.254.10" 
+ request ANY sip-header Contact modify "192.168.200.10" "192.168.254.10" 
+ response ANY sip-header Contact modify "192.168.254.10" "192.168.200.10" 
+ response ANY sip-header Remote-Party-ID modify "192.168.254.10" "192.168.200.10" 
+ request ANY sip-header From modify "192.168.254.10" "192.168.200.10" 
+ request ANY sip-header Via modify "192.168.254.10" "192.168.200.10" 
+ request ANY sip-header Remote-Party-ID modify "192.168.254.10" "192.168.200.10" 
+ request ANY sip-header Contact modify "192.168.254.10" "192.168.200.10" 
+ request ANY sdp-header Audio-Connection-Info modify "192.168.200.10" "192.168.254.10" 
+ request ANY sdp-header Connection-Info modify "192.168.200.10" "192.168.254.10" 
+ request ANY sdp-header Session-Owner modify "192.168.200.10" "192.168.254.10" 
+ response ANY sdp-header Session-Owner modify "192.168.254.10" "192.168.200.10" 
+ response ANY sdp-header Connection-Info modify "192.168.254.10" "192.168.200.10" 
+ response ANY sdp-header Audio-Connection-Info modify "192.168.254.10" "192.168.200.10" 
+ request ANY sdp-header Audio-Connection-Info modify "192.168.254.10" "192.168.200.10" 
+ request ANY sdp-header Connection-Info modify "192.168.254.10" "192.168.200.10" 
+ request ANY sdp-header Session-Owner modify "192.168.254.10" "192.168.200.10" 
+!
+!
+!
+!
+voice translation-rule 1
+ rule 1 /^911/ /\0/ plan any national
+ rule 2 /^9\([2-9]......\)/ /\1/ plan any national
+ rule 3 /^91\([2-9]..[2-9]......\)/ /\1/ plan any national
+ rule 4 /^9011\(.*\)/ /\1/ plan any national
+!
+voice translation-rule 2
+ rule 1 /^1336......./ /\0/ plan any national
+!
+voice translation-rule 3
+ rule 1 /^011.*/ /\0/ plan any national
+!
+voice translation-rule 98
+ rule 1 /9838/ /913367898571/
+ rule 2 /9879/ /913367898571/
+!
+!
+voice translation-profile FAX-FORWARD
+ translate called 98
+!
+voice translation-profile INTERNATIONAL
+ translate calling 1
+ translate called 3
+!
+voice translation-profile NATIONAL
+ translate calling 1
+ translate called 2
+!
+!
+!
+!
+application
+ service CCM http://192.168.253.30:8080/ccmivr/pages/IVRMainpage.vxml
+ !
+!
+license udi pid CISCO2911/K9 sn FTX1818AHCS
+hw-module pvdm 0/0
+!
+!
+!
+username Administrator privilege 15 password 7 1434002C4840787B757E72
+username crgadmin privilege 15 secret 5 $1$Xn4L$6hya2IQoEyut5LJwB0BjN0
+!
+redundancy
+!
+!
+controller T1 0/0/0
+ cablelength long 0db
+ pri-group timeslots 1-24
+!
+controller T1 0/0/1
+ cablelength long 0db
+!
+ip tftp source-interface GigabitEthernet0/0
+!
+!
+!
+!
+interface Loopback0
+ ip address 192.168.200.10 255.255.255.0
+!
+interface Embedded-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/0
+ ip address 192.168.254.10 255.255.255.0
+ ip flow monitor NfliteMonitor sampler NfliteSampler input
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0:23
+ no ip address
+ encapsulation hdlc
+ isdn switch-type primary-4ess
+ isdn incoming-voice voice
+ no cdp enable
+!
+ip forward-protocol nd
+!
+ip http server
+no ip http secure-server
+!
+ip route 0.0.0.0 0.0.0.0 192.168.254.1
+!
+logging host 192.168.253.100
+!
+!
+snmp-server community crgcr RO
+snmp-server community snmpcrg RW
+snmp-server host 192.168.253.100 version 2c snmpcrg 
+snmp-server host 192.168.253.95 snmpcrg 
+!
+control-plane
+!
+!
+voice-port 0/0/0:23
+ local-alerting
+!
+voice-port 0/1/0
+ caller-id enable
+!
+voice-port 0/1/1
+ caller-id enable
+ !
+ !
+ !
+ !
+!
+mgcp rtp unreachable timeout 1000 action notify
+mgcp modem passthrough voip mode nse
+mgcp package-capability rtp-package
+mgcp package-capability sst-package
+mgcp package-capability pre-package
+no mgcp package-capability res-package
+no mgcp timer receive-rtcp
+mgcp sdp simple
+mgcp fax t38 inhibit
+mgcp behavior rsip-range tgcp-only
+mgcp behavior comedia-role none
+mgcp behavior comedia-check-media-src disable
+mgcp behavior comedia-sdp-force disable
+!
+mgcp profile default
+!
+sccp local GigabitEthernet0/0
+sccp ccm 192.168.253.160 identifier 1 priority 1 version 7.0 
+sccp
+!
+sccp ccm group 1
+ associate ccm 1 priority 1
+ associate profile 1 register HP_XCODER
+!
+!
+no ccm-manager fax protocol cisco
+!
+dspfarm profile 1 transcode  
+ codec g729abr8
+ codec g729ar8
+ codec g711alaw
+ codec g711ulaw
+ codec g729br8
+ codec g729r8
+ codec ilbc
+ codec g722-64
+ maximum sessions 4
+ associate application SCCP
+!
+dial-peer voice 1 pots
+ translation-profile incoming FAX-FORWARD
+ incoming called-number .
+ direct-inward-dial
+ port 0/0/0:23
+!
+dial-peer voice 911 pots
+ destination-pattern 911
+ port 0/0/0:23
+ forward-digits all
+!
+dial-peer voice 10 pots
+ destination-pattern 9[2-9]......$
+ port 0/0/0:23
+ forward-digits 7
+!
+dial-peer voice 11 pots
+ destination-pattern 91[2-9]..[2-9]......$
+ port 0/0/0:23
+ forward-digits 10
+!
+dial-peer voice 12 pots
+ destination-pattern 9011T
+ port 0/0/0:23
+ prefix 011
+!
+dial-peer voice 1000 voip
+ destination-pattern ....$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number .
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 2000 voip
+ session protocol sipv2
+ incoming called-number 40019343
+ voice-class codec 3  
+ dtmf-relay h245-alphanumeric rtp-nte sip-kpml
+ no vad
+!
+dial-peer voice 2001 voip
+ preference 1
+ destination-pattern 4001934.
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ voice-class codec 3  
+ dtmf-relay h245-alphanumeric rtp-nte sip-kpml
+ no vad
+!
+dial-peer voice 2002 voip
+ destination-pattern 506........$
+ session protocol sipv2
+ session target ipv4:184.173.219.134
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 3000 voip
+ service ccm
+ destination-pattern 73090
+ session target ipv4:192.168.253.160
+ incoming called-number 73090
+ dtmf-relay h245-alphanumeric
+ codec g711ulaw
+ no vad
+!
+dial-peer voice 4000 pots
+ destination-pattern 9838
+ port 0/1/0
+ forward-digits 0
+!
+dial-peer voice 4001 pots
+ destination-pattern 9879
+ port 0/1/1
+!
+dial-peer voice 5255 voip
+ description INCOMING_CALLS_FROM_MEXICO
+ preference 1
+ destination-pattern 5061900208.$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 52551 voip
+ description OUTGOING_CALLS_TO_MEXICO
+ destination-pattern 52T
+ session protocol sipv2
+ session target ipv4:184.173.219.134
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 5713 voip
+ description INCOMING_CALLS_FROM_COLOMBIA
+ preference 1
+ destination-pattern 50619002050$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 5411 voip
+ description OUTGOING_CALLS_TO_Argentina
+ preference 1
+ destination-pattern 54T
+ session protocol sipv2
+ session target ipv4:184.173.219.134
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 5622 voip
+ description INCOMING_CALLS_FROM_CHILE_56229381249
+ preference 1
+ destination-pattern 50619002048$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+dial-peer voice 302 voip
+ description NRC-GBG-TO-CRG
+ destination-pattern 75......
+ session protocol sipv2
+ session target ipv4:10.194.120.30
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ codec g711ulaw
+ no vad
+!
+dial-peer voice 305 voip
+ description NRC-GBG-TO-CRG
+ destination-pattern 227775
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ voice-class sip bind control source-interface GigabitEthernet0/0
+ voice-class sip bind media source-interface GigabitEthernet0/0
+ dtmf-relay rtp-nte
+ codec g711ulaw
+ no vad
+!
+dial-peer voice 306 voip
+ description NRC-GBG-TO-CRG
+ session protocol sipv2
+ incoming called-number 227775
+ voice-class sip profiles 100
+ dtmf-relay rtp-nte
+ codec g711ulaw
+ no vad
+!
+dial-peer voice 2003 voip
+ destination-pattern 506800.......$
+ session protocol sipv2
+ session target ipv4:184.173.219.134
+ voice-class codec 3  
+ dtmf-relay rtp-nte
+ no vad
+!
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+!
+line con 0
+line aux 0
+line 2
+ exec-timeout 30 0
+ login local
+ no activation-character
+ no exec
+ transport preferred none
+ transport output none
+ stopbits 1
+line vty 0 4
+ login local
+ transport input ssh
+!
+scheduler allocate 20000 1000
+ntp master
+ntp server pool.ntp.org
+!
+end
