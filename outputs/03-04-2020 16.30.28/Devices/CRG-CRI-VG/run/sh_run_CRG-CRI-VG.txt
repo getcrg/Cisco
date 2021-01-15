@@ -1,0 +1,1099 @@
+
+
+Building configuration...
+
+
+Current configuration : 27093 bytes
+!
+! Last configuration change at 09:13:52 CRC Wed Feb 26 2020 by crgadmin
+! NVRAM config last updated at 09:13:54 CRC Wed Feb 26 2020 by crgadmin
+!
+version 16.9
+service timestamps debug datetime show-timezone
+service timestamps log datetime msec
+service password-encryption
+platform qfp utilization monitor load 80
+no platform punt-keepalive disable-kernel-core
+!
+hostname CRG-CRI-VG
+!
+boot-start-marker
+boot system bootflash:isr4300-universalk9.16.09.03.SPA.bin
+boot-end-marker
+!
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+logging buffered 100000
+enable secret level 5 5 $1$tNvt$qSy6.UVkf94mKxpjd5FvV0
+!
+no aaa new-model
+clock timezone CRC -6 0
+!
+ip domain name GRG.LOCAL
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+multilink bundle-name authenticated
+!
+flow record NFArecord
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match application name
+ match interface input
+ collect interface output
+ collect ipv4 source mask
+ collect ipv4 destination prefix
+ collect ipv4 destination mask
+ collect counter bytes long
+ collect counter packets long
+ collect timestamp sys-uptime first
+ collect timestamp sys-uptime last
+!
+!
+flow exporter NFAexporter
+ destination 192.168.253.121
+ source GigabitEthernet0/0/0.44
+ transport udp 9996
+ template data timeout 60
+ option interface-table timeout 60
+ option application-table timeout 60
+!
+!
+flow monitor NFAmonitor
+ exporter NFAexporter
+ cache timeout active 60
+ record NFArecord
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+voice service voip
+ no ip address trusted authenticate
+ address-hiding
+ mode border-element license capacity 50
+ allow-connections h323 to h323
+ allow-connections sip to h323
+ allow-connections sip to sip
+ no supplementary-service sip moved-temporarily
+ no supplementary-service sip refer
+ sip
+  bind control source-interface GigabitEthernet0/0/0.44
+  bind media source-interface GigabitEthernet0/0/0.44
+  registrar server expires max 600 min 60
+  early-offer forced
+  g729 annexb-all
+  no call service stop
+!
+voice class codec 1
+ codec preference 1 g711alaw
+ codec preference 2 g711ulaw
+ codec preference 3 g729r8
+ codec preference 4 g729br8
+!
+voice class codec 3
+ codec preference 1 g722-64
+ codec preference 2 g711ulaw
+ codec preference 3 g729r8
+ codec preference 4 g711alaw
+!
+!
+voice class sip-profiles 100
+ request ANY sip-header From modify "192.168.44.5" "168.232.29.90" 
+ request ANY sip-header Via modify "192.168.44.5" "168.232.29.90" 
+ request ANY sip-header Remote-Party-ID modify "192.168.44.5" "168.232.29.90" 
+ request ANY sip-header Contact modify "192.168.44.5" "168.232.29.90" 
+ response ANY sip-header Contact modify "192.168.44.5" "168.232.29.90" 
+ response ANY sip-header Remote-Party-ID modify "192.168.44.5" "168.232.29.90" 
+ request REINVITE sip-header Remote-Party-ID modify "<sip:8...@" "<sip:40011978@" 
+ request INVITE sip-header Remote-Party-ID modify "<sip:8...@" "<sip:40011978@" 
+ request REINVITE sip-header Remote-Party-ID modify "<sip:8376261" "<sip:40001485@" 
+ request INVITE sip-header Remote-Party-ID modify "<sip:8376261" "<sip:40001485@" 
+ request ANY sdp-header Audio-Connection-Info modify "192.168.44.5" "168.232.29.90" 
+ request ANY sdp-header Connection-Info modify "192.168.44.5" "168.232.29.90" 
+ request ANY sdp-header Session-Owner modify "192.168.44.5" "168.232.29.90" 
+ response ANY sdp-header Session-Owner modify "192.168.44.5" "168.232.29.90" 
+ response ANY sdp-header Connection-Info modify "192.168.44.5" "168.232.29.90" 
+ response ANY sdp-header Audio-Connection-Info modify "192.168.44.5" "168.232.29.90" 
+!
+voice class sip-profiles 101
+ request REINVITE sip-header Remote-Party-ID modify "<sip:8...@" "<sip:40011978@" 
+ request INVITE sip-header Remote-Party-ID modify "<sip:8...@" "<sip:40011978@" 
+!
+voice class sip-profiles 102
+ request REINVITE sip-header Remote-Party-ID modify "<sip:8...@" "<sip:40001485@" 
+ request INVITE sip-header Remote-Party-ID modify "<sip:8...@" "<sip:40001485@" 
+!
+!
+!
+!
+voice register global
+ mode cme
+ source-address 192.168.44.5 port 5060
+ max-dn 10
+ max-pool 10
+ authenticate realm all
+ tftp-path flash:
+ create profile sync 6005044140161257
+ auto-register
+ !
+!
+voice register dn  1
+ number 1002
+!
+voice register template  1
+ button-layout 1-5 line
+!
+voice register pool  1
+ busy-trigger-per-button 2
+ id mac 0008.32C6.143C
+ session-transport tcp
+ type 7821
+ number 1 dn 1
+ template 1
+ dtmf-relay rtp-nte sip-kpml
+ voice-class codec 1
+ username 1002 password 1002
+ description 1002
+ no vad
+!
+voice register pool  3
+ busy-trigger-per-button 2
+ id mac 00E1.8C8B.9106
+ type 7821
+ number 1 dn 1
+ template 1
+ dtmf-relay rtp-nte sip-kpml
+ voice-class codec 1
+ username cisco2 password cisco
+!
+voice hunt-group 1 longest-idle
+ final 1001
+ list 1001,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014
+ timeout 20 
+ pilot 8114 
+!
+!
+!
+voice translation-rule 7
+ rule 1 /^1...$/ /40001176/
+!
+voice translation-rule 8
+ rule 1 /^9\(........\)/ /\1/
+!
+voice translation-rule 10
+ rule 1 /40011975/ /90012404540887/
+!
+voice translation-rule 11
+ rule 1 /88610447/ /40011975/
+!
+voice translation-rule 12
+ rule 1 /8631551/ /40005795/
+ rule 2 /8380338/ /40002677/
+ rule 3 /8628308/ /40016361/
+ rule 4 /8628657/ /40016358/
+ rule 5 /8628871/ /40015971/
+ rule 6 /8628872/ /40016317/
+ rule 7 /8628873/ /40016382/
+ rule 8 /8628869/ /40019173/
+ rule 9 /8628875/ /40019655/
+ rule 10 /8628911/ /40019982/
+ rule 11 /8623751/ /40016877/
+ rule 12 /8629071/ /525541708445/
+ rule 13 /8629181/ /40022538/
+ rule 14 /8629183/ /40016368/
+ rule 15 /8629447/ /40018726/
+ rule 16 /8629182/ /40000840/
+ rule 17 /8629595/ /40016233/
+ rule 18 /8629651/ /40015281/
+ rule 19 /8629681/ /40015941/
+ rule 20 /8629716/ /40000860/
+ rule 21 /8630083/ /40001176/
+ rule 22 /8630082/ /40016318/
+ rule 23 /8630081/ /40016493/
+ rule 24 /8629723/ /40002933/
+ rule 25 /8628874/ /40016399/
+ rule 26 /8626527/ /40000347/
+ rule 28 /8631931/ /40001624/
+ rule 29 /8632197/ /40001297/
+ rule 30 /8632839/ /40011954/
+ rule 31 /8633169/ /40016374/
+!
+voice translation-rule 13
+ rule 1 /40013865/ /8611885/
+!
+voice translation-rule 14
+ rule 1 /^846\.*/ /845\1/
+!
+voice translation-rule 900845
+ rule 1 /^900\.*/ /845\1/
+!
+!
+voice translation-profile 3
+ translate calling 7
+ translate called 8
+!
+voice translation-profile 846-CMW
+ translate calling 13
+ translate called 14
+!
+voice translation-profile CMW
+ translate called 12
+!
+voice translation-profile INTL
+ translate called 900845
+!
+voice translation-profile RedirectPSTN
+ translate calling 11
+ translate called 10
+!
+!
+!
+license udi pid ISR4321/K9 sn FDO21121EBP
+license accept end user agreement
+no license smart enable
+diagnostic bootup level minimal
+!
+spanning-tree extend system-id
+!
+!
+!
+username crgadmin privilege 15 secret 5 $1$b8RK$/dLwEXtmqqMrH5LoM1nqb.
+username administrator privilege 15 password 7 132605354F48567A7A7369
+username cisco password 7 094F471A1A0A
+!
+redundancy
+ mode none
+!
+!
+!
+!
+!
+!
+!
+template 1
+!
+!
+!
+interface GigabitEthernet0/0/0
+ no ip address
+ negotiation auto
+!
+interface GigabitEthernet0/0/0.1
+ encapsulation dot1Q 1 native
+!
+interface GigabitEthernet0/0/0.44
+ encapsulation dot1Q 44
+ ip flow monitor NFAmonitor input
+ ip address 192.168.44.5 255.255.255.0
+!
+interface GigabitEthernet0/0/1
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ shutdown
+ negotiation auto
+!
+ip default-gateway 192.168.44.1
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+ip tftp source-interface GigabitEthernet0/0/0.44
+ip route 0.0.0.0 0.0.0.0 192.168.44.1
+!
+ip ssh source-interface GigabitEthernet0/0/0
+ip ssh version 2
+!
+logging trap warnings
+logging host 192.168.56.1
+logging host 192.168.253.100
+logging host 192.168.254.100
+!
+!
+snmp-server community crg RO crg
+snmp-server community crgcr RO
+snmp-server community snmpcrg RW
+snmp-server location CRG-CR
+snmp-server enable traps alarms informational
+snmp-server host 192.168.253.100 version 2c snmpcrg 
+snmp-server host 192.168.253.95 snmpcrg 
+snmp ifmib ifindex persist
+!
+!
+control-plane
+!
+!
+mgcp behavior rsip-range tgcp-only
+mgcp behavior comedia-role none
+mgcp behavior comedia-check-media-src disable
+mgcp behavior comedia-sdp-force disable
+!
+mgcp profile default
+!
+sccp local GigabitEthernet0/0/0.44
+sccp ccm 192.168.253.160 identifier 10 priority 1 version 7.0 
+sccp
+!
+sccp ccm group 10
+ description MTP CRI CUBE
+ bind interface GigabitEthernet0/0/0.44
+ associate ccm 10 priority 1
+ associate profile 100 register crimtp
+!
+!
+!
+telephony-service
+ max-ephones 20
+ max-dn 20
+ ip source-address 192.168.44.5 port 2000
+ service phone pcPort 1
+ cnf-file location flash:
+ time-zone 13
+ date-format dd-mm-yy
+ max-conferences 8 gain -6
+ call-forward pattern .T
+ transfer-system full-consult
+ transfer-pattern .T
+ create cnf-files version-stamp 7960 Aug 30 2019 14:02:16
+!
+!
+dspfarm profile 100 mtp  
+ codec g711ulaw
+ maximum sessions software 2000
+ associate application SCCP
+!
+dial-peer voice 1 voip
+ destination-pattern 4001....$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 4001....$
+ voice-class codec 3  
+ voice-class sip profiles 101
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 845 voip
+ destination-pattern 845[2-9].......$
+ session protocol sipv2
+ session target ipv4:64.73.216.70
+ voice-class codec 1  
+ no voice-class sip early-offer forced
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+!
+dial-peer voice 8451 voip
+ preference 1
+ destination-pattern 845[2-9].......$
+ session protocol sipv2
+ session target ipv4:69.13.198.131
+ voice-class codec 1  
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+!
+dial-peer voice 845900 voip
+ description INTL
+ translation-profile outgoing INTL
+ destination-pattern 900T
+ session protocol sipv2
+ session target ipv4:64.73.216.70
+ voice-class codec 1  
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+!
+dial-peer voice 8459001 voip
+ description INTL
+ translation-profile outgoing INTL
+ preference 1
+ destination-pattern 900T
+ session protocol sipv2
+ session target ipv4:69.13.198.131
+ voice-class codec 1  
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+!
+dial-peer voice 502 voip
+ description === Guatemala ====
+ destination-pattern 506190020[56].$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 506190020[56].$
+ voice-class codec 1  
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 2000 voip
+ description NRC
+ session protocol sipv2
+ incoming called-number 40011978
+ voice-class codec 3  
+ voice-class sip profiles 100
+ dtmf-relay h245-alphanumeric rtp-nte sip-kpml
+ no vad
+!
+dial-peer voice 2001 voip
+ description NRC
+ preference 1
+ destination-pattern 4001197.
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ voice-class codec 3  
+ dtmf-relay h245-alphanumeric rtp-nte sip-kpml
+ no vad
+!
+dial-peer voice 40002677 voip
+ description ===Clear Corp CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 4000....$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8380338$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016358 voip
+ description ===Legal Abogados CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 400016358$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628657$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40015971 voip
+ description ===Oficina Privada 2 CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40015971$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628871$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016317 voip
+ description ===Oficina Privada 14 CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016317$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628872$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016382 voip
+ description ===Econegocios CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016382$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628873$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40019173 voip
+ description ===Frafely CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40019173$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628869$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40019655 voip
+ description ===Oficina privada 15 CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40019655$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628875$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016877 voip
+ description ===Amazilia CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016877$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8623751$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 52554170 voip
+ description ===CRG Mexico CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 525541708445$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629071$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40022538 voip
+ description ===TBC Agency CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40022538$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629181$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40018726 voip
+ description ===HNRLAWYERS CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40018726$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629447$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40000840 voip
+ description ===OIKOCREDIT CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40000840$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629182$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40015281 voip
+ description ===CRG Luis Mendez CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40015281$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629651$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016233 voip
+ description ===CRG Francisco Chacon CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016233$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629595$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40015941 voip
+ description ===CRG Luis Arce CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40015941$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629681$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40000860 voip
+ description ===Republic Santa Ana CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40015281$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629716$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016361 voip
+ description ===JB Consultores CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016361$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628308$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40001176 voip
+ description ===Ask Legal CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40001176$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8630083$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016318 voip
+ description ===GOP Solutions CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016318$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8630082$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016493 voip
+ description ===Il Capriccio CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016493$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8630081$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40002933 voip
+ description ===Boca E Jarro CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40002933$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8629723$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016399 voip
+ description ===Grupo Sistema de Consultores CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016399$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628874$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40019982 voip
+ description ===Sanacare CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40019982$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8628911$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40000347 voip
+ description ===Business Partner Costa Rica CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40000347$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8626527$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 846 voip
+ translation-profile outgoing 846-CMW
+ destination-pattern 846[2-9].......$
+ session protocol sipv2
+ session target ipv4:64.73.216.70
+ voice-class codec 1  
+ no voice-class sip early-offer forced
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+ authentication username 8611885 password 7 1441425E5D5078797C7D606C realm cisco
+!
+dial-peer voice 40005795 voip
+ description ===9Round CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40005795$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8631551$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016954 voip
+ description ===Unisys CMW-Number======
+ translation-profile incoming CMW
+ destination-pattern 40016954$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8631553$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+!
+dial-peer voice 40001624 voip
+ description ===Axion Soft CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40001624$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8631931$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40001297 voip
+ description ===SUPER TRANSLATIONS CMW-Number====
+ translation-profile incoming CMW
+ destination-pattern 40001297$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8632197$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 6 voip
+ translation-profile outgoing 3
+ destination-pattern 9[2-9].......$
+ session protocol sipv2
+ session target ipv4:64.73.216.70
+ voice-class codec 1  
+ no voice-class sip early-offer forced
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+!
+dial-peer voice 7 voip
+ translation-profile outgoing 3
+ preference 1
+ destination-pattern 9[2-9].......$
+ session protocol sipv2
+ session target ipv4:69.13.198.131
+ voice-class codec 1  
+ voice-class sip profiles 100
+ dtmf-relay sip-kpml rtp-nte
+ no vad
+!
+dial-peer voice 40011954 voip
+ description ===ICM CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40011954$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8632839$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+dial-peer voice 40016374 voip
+ description ===CRG Santa Ana CMW-Number===
+ translation-profile incoming CMW
+ destination-pattern 40016374$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 8633169$
+ voice-class codec 3  
+ voice-class sip profiles 102
+ dtmf-relay sip-kpml rtp-nte h245-alphanumeric
+ no vad
+!
+!
+sip-ua 
+ credentials username 8632197 password 7 01415E53085D5F5676181D58 realm cisco
+ credentials username 8629716 password 7 13504E455A54527D78717161 realm cisco
+ credentials username 8380338 password 7 025E540C5A5E5B711D1C5A41 realm cisco
+ credentials username 8623751 password 7 135347455A5F537F7C727962 realm cisco
+ credentials username 8626527 password 7 08771C1A5C405347465D5B55 realm cisco
+ credentials username 8628308 password 7 0052425F51085E5759721B1C realm cisco
+ credentials username 8628657 password 7 0351035B535A781B1C5F4D54 realm cisco
+ credentials username 8628869 password 7 03570A5F5F5F75151E59415D realm cisco
+ credentials username 8628871 password 7 124D5C4E435E595072787270 realm cisco
+ credentials username 8628872 password 7 00574555570952525E781F1B realm cisco
+ credentials username 8628873 password 7 115F4D52464A5C5E577F7876 realm cisco
+ credentials username 8628874 password 7 135046465A555C7D7E777A66 realm cisco
+ credentials username 8628875 password 7 1441405B5D517C737D7C6661 realm cisco
+ credentials username 8628911 password 7 040252545E761E1F5B4A544F realm cisco
+ credentials username 8629071 password 7 135340465A55507B73717D6B realm cisco
+ credentials username 8629182 password 7 12485D44435A5C54787E717C realm cisco
+ credentials username 8629447 password 7 124A564E465E5D517F727D7F realm cisco
+ credentials username 8629595 password 7 11584F5D4640525E517C7377 realm cisco
+ credentials username 8629651 password 7 005C42545D035F5E5B781B16 realm cisco
+ credentials username 8629681 password 7 1546535E527E7B777D606473 realm cisco
+ credentials username 8629723 password 7 04085D545E751D165A405746 realm cisco
+ credentials username 8630081 password 7 075C77191F5E4B5043425C54 realm cisco
+ credentials username 8630082 password 7 03570D5C575875181F514C5C realm cisco
+ credentials username 8630083 password 7 101B5E405347465859507879 realm cisco
+ credentials username 8631551 password 7 055A545B70151F5C4B504043 realm cisco
+ credentials username 8631553 password 7 00524353550258575B741D1F realm cisco
+ credentials username 8631931 password 7 075875181F51485643445C5A realm cisco
+ credentials username 8632839 password 7 06555B771F1F504053414552 realm cisco
+ credentials username 8633169 password 7 1445475E5D537D7B7D7F6A66 realm cisco
+ authentication username 8633169 password 7 101C5C4C5440455B55537378
+ retry invite 3
+ timers trying 200
+ registrar 1 ipv4:50.23.31.10:5060 expires 3600
+ sip-server ipv4:50.23.31.10:5060
+!
+!
+ephone-template  1
+ service phone pcPort 0
+ softkeys seized  Redial Endcall Meetme Cfwdall
+!
+!
+ephone-dn  1  octo-line
+ number 1001
+ name CIPC
+!
+!
+ephone-dn  2  octo-line
+ number 1005
+ name CIPC
+!
+!
+ephone-dn  3  octo-line
+ number 1006
+ label 1006
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  4  octo-line
+ number 1007
+ label 1007
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  5  octo-line
+ number 1008
+ label 1008
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  6  octo-line
+ number 1009
+ label 1009
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  7  octo-line
+ number 1010
+ label 1010
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  8  octo-line
+ number 1011
+ label 1011
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  9  octo-line
+ number 1012
+ label 1012
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  10  octo-line
+ number 1013
+ label 1013
+ description 3368753103
+ name CIPC
+!
+!
+ephone-dn  11  octo-line
+ number 1014
+ label 1014
+ description 3368753103
+ name CIPC
+!
+!
+ephone  1
+ mac-address 00E1.8C8B.9106
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:1
+!
+!
+!
+ephone  2
+ mac-address 00E1.8C8B.9108
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:2
+!
+!
+!
+ephone  3
+ mac-address D43B.04EA.5019
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:3
+!
+!
+!
+ephone  4
+ mac-address 6C4B.906A.A7CC
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:4
+!
+!
+!
+ephone  5
+ mac-address 6C4B.906A.A857
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:5
+!
+!
+!
+ephone  6
+ mac-address 6C4B.906A.A862
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:6
+!
+!
+!
+ephone  7
+ mac-address 6C4B.906A.A891
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:7
+!
+!
+!
+ephone  8
+ mac-address 6C4B.906A.A85C
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:8
+!
+!
+!
+ephone  9
+ mac-address 74E5.F979.E9D7
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:9
+!
+!
+!
+ephone  10
+ mac-address 38DE.AD68.F2FD
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:10
+!
+!
+!
+ephone  11
+ mac-address 6C4B.903A.289E
+ ephone-template 1
+ busy-trigger-per-button 2
+ type CIPC
+ button  1:11
+!
+!
+!
+line con 0
+ transport input none
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ session-timeout 5 
+ password 7 072C136B0A4D4B554645
+ login local
+ transport input all
+!
+ntp server 192.168.44.1
+!
+!
+!
+!
+!
+end

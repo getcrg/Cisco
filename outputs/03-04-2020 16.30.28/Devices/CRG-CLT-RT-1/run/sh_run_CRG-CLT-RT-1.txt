@@ -1,0 +1,367 @@
+Building configuration...
+
+
+Current configuration : 6985 bytes
+!
+version 15.4
+service config
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname CRG-CLT-RT-1
+!
+boot-start-marker
+boot-end-marker
+!
+aqm-register-fnf
+!
+card type t1 0 0
+logging buffered 10000000
+enable secret 5 $1$5geZ$QpUSh8YPlHVujZ9r1Fbyb.
+!
+no aaa new-model
+clock timezone EDT -5 0
+clock summer-time EDT recurring
+network-clock-participate wic 0 
+!
+!
+!
+!
+!
+!
+!
+ip domain lookup source-interface GigabitEthernet0/0
+ip domain name crgwf.com
+ip name-server 192.168.10.17
+ip multicast-routing 
+ip cef
+no ipv6 cef
+multilink bundle-name authenticated
+!
+!
+flow record NfliteRecord
+ match datalink mac source address input
+ match datalink mac destination address input
+ match ipv4 tos
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match ipv6 protocol
+ match ipv6 source address
+ match ipv6 destination address
+ match transport source-port
+ match transport destination-port
+ collect transport tcp flags rst
+ collect interface input
+ collect flow sampler
+ collect counter bytes long
+ collect counter packets long
+ collect timestamp sys-uptime first
+ collect timestamp sys-uptime last
+!
+!
+flow exporter NfliteExporter
+ destination 192.168.253.80
+ source Loopback0
+ transport udp 9996
+ template data timeout 60
+ option interface-table
+ option exporter-stats
+ option sampler-table
+!
+!
+flow monitor NfliteMonitoring
+ exporter NfliteExporter
+ cache timeout active 60
+ statistics packet protocol
+ record NfliteRecord
+!
+sampler NfliteSampler
+ mode random 1 out-of 32
+!
+!
+!
+!
+isdn switch-type primary-4ess
+!
+!
+!
+voice-card 0
+ dsp services dspfarm
+!
+!
+!
+voice service voip
+ ip address trusted list
+  ipv4 184.173.219.134
+  ipv4 192.168.0.0 255.255.0.0
+ address-hiding
+ mode border-element 
+ allow-connections h323 to sip
+ allow-connections sip to h323
+ allow-connections sip to sip
+ fax protocol t38 version 0 ls-redundancy 0 hs-redundancy 0 fallback none
+ sip
+  early-offer forced
+  midcall-signaling passthru
+  g729 annexb-all
+!
+voice class h323 1
+  h225 timeout tcp establish 3
+!
+!
+!
+!
+voice translation-rule 1
+ rule 1 /3725/ /913368753056/
+ rule 2 /3726/ /913368753057/
+ rule 3 /3727/ /913368753058/
+ rule 4 /3728/ /913368753059/
+ rule 6 /3731/ /913368753064/
+ rule 8 /3733/ /913368753066/
+ rule 9 /3734/ /913368753067/
+ rule 11 /3736/ /913368753069/
+ rule 12 /3737/ /913368753070/
+ rule 13 /3738/ /913368753072/
+ rule 14 /3739/ /913368753073/
+ rule 15 /3740/ /913368753074/
+ rule 16 /3741/ /913368753075/
+ rule 17 /3746/ /913368753076/
+ rule 18 /3747/ /913368753123/
+ rule 19 /3750/ /913368753083/
+ rule 20 /3751/ /913368753084/
+ rule 21 /3752/ /913368753091/
+ rule 22 /9555/ /913368753054/
+ rule 23 /8555/ /913368753082/
+ rule 24 /3732/ /913368753145/
+ rule 25 /3730/ /913368753144/
+ rule 26 /3799/ /913368753104/
+ rule 27 /3753/ /913368753088/
+ rule 28 /3754/ /913368753087/
+ rule 29 /3745/ /913368753147/
+ rule 30 /3735/ /913368753077/
+!
+voice translation-rule 2
+ rule 1 /.*/ /7045263735/
+!
+!
+voice translation-profile CFwdALL
+ translate calling 2
+ translate called 1
+!
+!
+!
+!
+application
+ service CCM http://192.168.10.30:8080/ccmivr/pages/IVRMainpage.vxml
+ !
+!
+license udi pid CISCO2911/K9 sn FTX1818AHGZ
+hw-module pvdm 0/0
+!
+!
+!
+username Administrator privilege 15 password 7 123A1730564F5E547B7D65
+username crgadmin privilege 15 secret 5 $1$eyPP$Lz./DFjMUdHdAjaci7JAs0
+!
+redundancy
+!
+!
+controller T1 0/0/0
+ cablelength long 0db
+ pri-group timeslots 1-24
+!
+controller T1 0/0/1
+ cablelength long 0db
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+ ip pim sparse-dense-mode
+!
+interface Embedded-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/0
+ ip address 192.168.10.10 255.255.255.0
+ ip flow monitor NfliteMonitoring sampler NfliteSampler input
+ ip pim sparse-dense-mode
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0:23
+ no ip address
+ encapsulation hdlc
+ isdn switch-type primary-4ess
+ isdn incoming-voice voice
+ no cdp enable
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+ip route 0.0.0.0 0.0.0.0 192.168.10.1
+!
+logging trap errors
+!
+!
+snmp-server community snmpcrg RO
+no snmp-server enable traps entity-sensor threshold
+snmp-server host 192.168.253.100 snmpcrg 
+!
+control-plane
+!
+!
+voice-port 0/0/0:23
+ local-alerting
+!
+voice-port 0/1/0
+ connection plar 7001
+ caller-id enable
+!
+voice-port 0/1/1
+ connection plar 7288
+ caller-id enable
+ !
+ !
+ !
+ !
+!
+mgcp rtp unreachable timeout 1000 action notify
+mgcp modem passthrough voip mode nse
+mgcp package-capability rtp-package
+mgcp package-capability sst-package
+mgcp package-capability pre-package
+no mgcp package-capability res-package
+no mgcp timer receive-rtcp
+mgcp sdp simple
+mgcp fax t38 inhibit
+mgcp bind control source-interface GigabitEthernet0/0
+mgcp bind media source-interface GigabitEthernet0/0
+mgcp behavior rsip-range tgcp-only
+mgcp behavior comedia-role none
+mgcp behavior comedia-check-media-src disable
+mgcp behavior comedia-sdp-force disable
+!
+mgcp profile default
+!
+sccp local GigabitEthernet0/0
+sccp ccm 192.168.253.160 identifier 1 priority 1 version 7.0 
+sccp
+!
+sccp ccm group 1
+ associate ccm 1 priority 1
+ associate profile 2 register CLT_CFB
+ associate profile 1 register CLT_XCODER
+!
+ccm-manager music-on-hold
+!
+ccm-manager fallback-mgcp 
+ccm-manager redundant-host CRG-HP-CUCM-1.CRGWF.COM
+ccm-manager mgcp
+no ccm-manager fax protocol cisco
+!
+dspfarm profile 1 transcode  
+ codec g722-64
+ codec ilbc
+ codec g729r8
+ codec g729br8
+ codec g711ulaw
+ codec g711alaw
+ codec g729ar8
+ codec g729abr8
+ maximum sessions 4
+ associate application SCCP
+!
+dspfarm profile 2 conference  
+ codec g722-64
+ codec ilbc
+ codec g711ulaw
+ codec g711alaw
+ codec g729ar8
+ codec g729abr8
+ codec g729r8
+ codec g729br8
+ maximum sessions 3
+ associate application SCCP
+!
+dial-peer voice 1 pots
+ translation-profile incoming CFwdALL
+ incoming called-number .
+ direct-inward-dial
+ port 0/0/0:23
+!
+dial-peer voice 911 pots
+ destination-pattern 911
+ port 0/0/0:23
+ forward-digits all
+!
+dial-peer voice 10 pots
+ destination-pattern 9.......$
+ port 0/0/0:23
+ forward-digits 7
+!
+dial-peer voice 11 pots
+ destination-pattern 91[2-9]..[2-9]......$
+ port 0/0/0:23
+ forward-digits 10
+!
+dial-peer voice 12 pots
+ destination-pattern 9011T
+ port 0/0/0:23
+ prefix 011
+!
+dial-peer voice 1000 voip
+ destination-pattern ....$
+ session protocol sipv2
+ session target ipv4:192.168.253.160
+ incoming called-number 9T
+ dtmf-relay rtp-nte sip-notify
+ codec g711ulaw
+ no vad
+!
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+!
+line con 0
+line aux 0
+line 2
+ exec-timeout 30 0
+ login local
+ no activation-character
+ no exec
+ transport preferred none
+ transport output pad telnet rlogin lapb-ta mop udptn v120 ssh
+ stopbits 1
+line vty 0 4
+ logging synchronous
+ login local
+ transport input ssh
+!
+scheduler allocate 20000 1000
+ntp server 192.168.10.17
+!
+end

@@ -5,6 +5,7 @@ import os
 import logging
 import socket
 import pandas
+import datetime
 
 
 # Function to stablish SSH session to device and execute a command or set of commands received from the main function
@@ -44,7 +45,7 @@ def connect_to_device(ip_address, username, password, command_to_run):
     return command_result
 
 
-def main():
+def main(time):
     # Read list of ips to connect from CSV file and skips the first row
     logger.debug("Getting list of devices from CSV File")
     host_list = open(r"C:\Users\jjimenez\Documents\GitHub\Cisco\Devices.csv", "rt")
@@ -54,6 +55,9 @@ def main():
     counter = 1
     device_dictionary = {}
     current_path = os.getcwd()
+
+    os.mkdir(current_path + "\\outputs\\" + time)
+    os.mkdir(current_path + "\\outputs\\" + time + "\\Devices\\")
 
     # Loops the content of the of the CSV file and performs the operations "show run" and "show version"
     for row in read_file:
@@ -76,9 +80,9 @@ def main():
         # To get the output of show run and save to a file
         logger.debug("Connecting to Device " + row_str + "to get output of show run")
         show_run_output = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "sh run")
-        os.mkdir(current_path + "\\outputs\\Devices\\" + dir_name)
-        os.mkdir(current_path + "\\outputs\\Devices\\" + dir_name + "\\run")
-        file_path = current_path + "\\outputs\\Devices\\" + dir_name + "\\run\\sh_run_" + str_hostname
+        os.mkdir(current_path + "\\outputs\\" + time + "\\Devices\\" + dir_name)
+        os.mkdir(current_path + "\\outputs\\" + time + "\\Devices\\" + dir_name + "\\run")
+        file_path = current_path + "\\outputs\\" + time + "\\Devices\\" + dir_name + "\\run\\sh_run_" + str_hostname
         try:
             my_output_file = open(file_path, "w")
             my_output_file.writelines(show_run_output)
@@ -90,8 +94,8 @@ def main():
         # To get the output of show version and save to a file
         logger.debug("Connecting to Device " + row_str + "to get output of show version")
         show_ver_output = connect_to_device(row_str, "crgadmin", "CRG3mpow3rs@dm1n", "sh version")
-        os.mkdir(current_path + "\\outputs\\Devices\\" + dir_name + "\\version")
-        file_path = current_path + "\\outputs\\Devices\\" + dir_name + "\\version\\sh_ver_" + str_hostname
+        os.mkdir(current_path + "\\outputs\\" + time + "\\Devices\\" + dir_name + "\\version")
+        file_path = current_path + "\\outputs\\" + time + "\\Devices\\" + dir_name + "\\version\\sh_ver_" + str_hostname
         try:
             my_output_file = open(file_path, "w")
             my_output_file.writelines(show_ver_output)
@@ -115,9 +119,9 @@ def main():
 
     # To write hostname,ip,ios to a CSV file for audit/report
     logger.debug("About to python directory containing device information to csv file")
-    csv_file = current_path + "\\outputs\\Device_Info.csv"
+    csv_file = current_path + "\\outputs\\" + time + "\\Device_Info.csv"
     try:
-       pandas.DataFrame.from_dict(device_dictionary,orient="index").to_csv(csv_file)
+        pandas.DataFrame.from_dict(device_dictionary, orient="index").to_csv(csv_file, sep=";")
     except csv.Error as strerror:
         logger.debug("Error creating File %s " + strerror)
 
@@ -136,4 +140,8 @@ if __name__ == '__main__':
 
     # add the handlers to the logger
     logger.addHandler(handler)
-    main()
+
+    now = datetime.datetime.now()
+    date_time = now.strftime("%m-%d-%Y %H.%M.%S")
+
+    main(date_time)

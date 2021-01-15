@@ -20,10 +20,10 @@ software.
 
 ROM: IOS-XE ROMMON
 
-CRG-CRI-VG uptime is 1 week, 4 days, 8 hours, 8 minutes
-Uptime for this control processor is 1 week, 4 days, 8 hours, 10 minutes
+CRG-CRI-VG uptime is 4 weeks, 5 days, 10 hours, 22 minutes
+Uptime for this control processor is 4 weeks, 5 days, 10 hours, 24 minutes
 System returned to ROM by PowerOn at 19:36:11 CRC Wed Aug 21 2019
-System restarted at 06:08:44 CRC Fri Jan 31 2020
+System restarted at 06:08:45 CRC Fri Jan 31 2020
 System image file is "bootflash:isr4300-universalk9.16.09.03.SPA.bin"
 Last reload reason: PowerOn
 

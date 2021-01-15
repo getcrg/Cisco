@@ -5,8 +5,9 @@ Compiled Wed 12-Feb-14 04:57 by prod_rel_team
 
 ROM: System Bootstrap, Version 15.0(1r)M16, RELEASE SOFTWARE (fc1)
 
-CRG-CLT-RT-1 uptime is 4 weeks, 2 days, 3 hours, 8 minutes
+CRG-HP-RTR-1 uptime is 26 weeks, 5 days, 17 hours, 1 minute
 System returned to ROM by power-on
+System restarted at 20:37:12 EDT Wed Aug 21 2019
 System image file is "flash0:c2900-universalk9-mz.SPA.154-1.T1.bin"
 Last reload type: Normal Reload
 Last reload reason: power-on
@@ -29,7 +30,7 @@ If you require further assistance please contact us by sending email to
 export@cisco.com.
 
 Cisco CISCO2911/K9 (revision 1.0) with 479232K/45056K bytes of memory.
-Processor board ID FTX1818AHGZ
+Processor board ID FTX1818AHCS
 3 Gigabit Ethernet interfaces
 24 Serial interfaces
 1 terminal line
@@ -47,7 +48,7 @@ License UDI:
 -------------------------------------------------
 Device#	  PID			SN
 -------------------------------------------------
-*1  	  CISCO2911/K9          FTX1818AHGZ     
+*1  	  CISCO2911/K9          FTX1818AHCS     
 
 
 
